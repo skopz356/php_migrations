@@ -2,8 +2,9 @@
 
 What is php_migrations for:
 It let’s you create migrations for mysql then work with the migrations like php objects.
-![Alt text](static/file_example.png?raw=true "Title")
 ![file_example](https://user-images.githubusercontent.com/36794259/51074257-50925080-167d-11e9-9705-5234c4e9253b.png)
+![migrations_example](https://user-images.githubusercontent.com/36794259/51074288-bc74b900-167d-11e9-91d3-e09b09a631fe.png)
+
 
 
 ## Getting Started
