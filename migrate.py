@@ -24,8 +24,14 @@ class Field(object):
         self.max_length = max_length
         self.null = null
 
+    # def __new__(cls, *args, **kwargs):
+    #     if "variety" in kwargs:
+    #         if kwargs["variety"] == "foreign-key":
+    #             return  ForeignKeyField(*args, **kwargs)
+    #         return super().__new__(*args, **kwargs)
+
     def needed_file(self):
-        return 'require("php_migrations_files/fields.php")' # TODO change this
+        return 'require("php_migrations_files/fields.php")'  # TODO change this
 
     def db_value(self):
         if not self.null:
@@ -45,6 +51,18 @@ class Field(object):
     def create_from_dict(cls, dictionary: dict):
         for name, data in dictionary.items():
             return cls(variety=data["type"], max_length=int(data["max-length"]))
+
+
+class ForeignKeyField(Field):
+    def __init__(s)
+    def db_value(self):
+        if not self.null:
+            return "%s(%d) NOT NULL" % ("INT", self.max_length)
+        else:
+            return "%s(%d)" % ("INT", self.max_length)
+
+    def php_value(self):
+        return "ForeginKey"
 
 
 class Model(object):
@@ -80,15 +98,26 @@ class Model(object):
     }""" % (
             self._needed_files(),
             self.name,
-            "\n".join(["\t\tpublic $"+name+";" for name in self.get_all_fields()]+['\t\tpublic static $dbName = "%s";' % (self.d_name)]),
-            
+            "\n".join(
+                ["\t\tpublic $" + name + ";" for name in self.get_all_fields()]
+                + ['\t\tpublic static $dbName = "%s";' % (self.d_name)]
+            ),
             str(
                 [
                     "'%s' => '%s'" % (name, field.php_value())
                     for name, field in self.get_all_fields().items()
                 ]
             ).replace('"', ""),
-            str([data["connection"]["host"], data["connection"]["user"], data["connection"]["password"], data["connection"]["db_name"]]).replace("[", "").replace("]", ""),
+            str(
+                [
+                    data["connection"]["host"],
+                    data["connection"]["user"],
+                    data["connection"]["password"],
+                    data["connection"]["db_name"],
+                ]
+            )
+            .replace("[", "")
+            .replace("]", ""),
         )
         return code
 
@@ -108,24 +137,41 @@ class Model(object):
             cursor.execute(self._get_full_sql())
 
     def _get_full_sql(self):
+        self.check_foreign()
         sql = "CREATE TABLE %s(" % (self.d_name)
         sql += self._get_id_sql()
         for name_field, field in self.get_all_fields().items():
             if isinstance(field, Field):
-                sql += "%s %s," % (name_field, field.db_value())
+                sql += "%s %s," % (
+                    name_field
+                    if not type(field) == ForeignKeyField
+                    else name_field + "_id",
+                    field.db_value(),
+                )
         if sql[len(sql) - 1] == ",":
             sql = sql[: len(sql) - 1]
+        if self.foreign:
+            return sql + ")" + "".join([f_field.constrait for f_field in self.get_all_fields(foreign=True)])
         return sql + ")"
 
     def _get_id_sql(self):
         return "id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,"
 
-    def get_all_fields(self):
+    def get_all_fields(self, foreign=False):
+        if not foreign:
+            cls = Field
+        else:
+            cls=ForeignKeyField
         return {
             name: field
             for name, field in vars(self).items()
-            if isinstance(field, Field)
+            if isinstance(field, cls)
         }
+
+    def check_foreign(self):
+        for name, field in vars(self):
+            if type(field) == ForeignKeyField:
+                self.foreign = True
 
     def _needed_files(self):
         from collections import OrderedDict
@@ -161,32 +207,33 @@ class IntField(Field):
     def __init(self, variety="INT", max_length=255, null=False):
         super().__init__(variety, max_length, null)
 
-argument = len(sys.argv) > 1 
-for key, value in data.items():
-    if key != "connection":
-        if value["type"] == "directory":
-            d = Directory(key)
-            for model, attributes in value["models"].items():
-                m = Model.create_from_dict({model: attributes})
-                if not argument:
-                    m.create()
-                elif sys.argv[1] == "db":
-                    m.create()
-                d.models.append(m)
-            if not argument:
-                d.php_create()
-            elif sys.argv[1] == "php":     
-                d.php_create()
 
-        if value["type"] == "model":
-            m = Model.create_from_dict({key: value})
-            if not argument:
-                m.create()
-            elif sys.argv[1] == "php":
-                with open(key + ".php", "w+") as file:
-                    file.write(m.to_php())
+m = Model("ahoj")
+setattr(m, "ahoj", Field(variety="int"))
+print(m._get_full_sql())
 
+# argument = len(sys.argv) > 1
+# for key, value in data.items():
+#     if key != "connection":
+#         if value["type"] == "directory":
+#             d = Directory(key)
+#             for model, attributes in value["models"].items():
+#                 m = Model.create_from_dict({model: attributes})
+#                 if not argument:
+#                     m.create()
+#                 elif sys.argv[1] == "db":
+#                     m.create()
+#                 d.models.append(m)
+#             if not argument:
+#                 d.php_create()
+#             elif sys.argv[1] == "php":
+#                 d.php_create()
 
-
-
+#         if value["type"] == "model":
+#             m = Model.create_from_dict({key: value})
+#             if not argument:
+#                 m.create()
+#             elif sys.argv[1] == "php":
+#                 with open(key + ".php", "w+") as file:
+#                     file.write(m.to_php())
 
