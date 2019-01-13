@@ -17,6 +17,11 @@ class Field extends BaseField
     protected $attribute = array();
     protected $type;
 
+    public function __toString()
+    {
+        return $this->value;
+    }
+
     public function __construct($value)
     {
         $this->setValue($value);

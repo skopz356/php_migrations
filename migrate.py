@@ -74,16 +74,13 @@ class Model(object):
         }
 
         public function getConnection(){
-            $this->connection = new mysqli(%s);
+            return new mysqli(%s);
         }
 
-        public function dbName(){
-            return %s;
-        }
     }""" % (
             self._needed_files(),
             self.name,
-            "\n".join(["\t\tpublic $"+name+";" for name in self.get_all_fields()]),
+            "\n".join(["\t\tpublic $"+name+";" for name in self.get_all_fields()]+['\t\tpublic static $dbName = "%s";' % (self.d_name)]),
             
             str(
                 [
@@ -92,7 +89,6 @@ class Model(object):
                 ]
             ).replace('"', ""),
             str([data["connection"]["host"], data["connection"]["user"], data["connection"]["password"], data["connection"]["db_name"]]).replace("[", "").replace("]", ""),
-            '"%s"' % (self.d_name)
         )
         return code
 

@@ -3,13 +3,22 @@ namespace AB;
 
 abstract class BaseModel
 {
-    private $connection;
+    protected static $connection;
+    public static $dbName;
+    public $id;
+
     public function __construct(array $attributes)
     {
+        static::$connection = $this->getConnection();
         foreach ($attributes as $key => $value) {
             if (property_exists($this, $key)) {
-                $cls = $this->getAttributes()[$key];
-                $this->$key = new $cls($value);
+                if (array_key_exists($key, $this->getAttributes())) {
+                    $cls = $this->getAttributes()[$key];
+                    $this->$key = new $cls($value);
+                }else{
+                    $this->$key = $value;
+                }
+
             }
         }
         $this->getConnection();
@@ -18,7 +27,6 @@ abstract class BaseModel
     abstract public function save();
     abstract public static function getAttributes();
     abstract public function getConnection();
-    abstract public function dbName();
 }
 
 // abstract class BaseField

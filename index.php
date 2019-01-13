@@ -2,12 +2,7 @@
 
 require_once "engine/Test1.php";
 $s = new Test1(["title" => 3, "some" => "ahoj"]);
-//$s->save();
-print_r($s->select_object(["id" => 3]));
-
-
-
-
+echo (Test1::get_by_id(2)->title);
 
 // class ahoj{
 //     public $name;
