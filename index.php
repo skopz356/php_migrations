@@ -1,17 +1,11 @@
 <?php
 
 require_once "engine/Test1.php";
-$s = new Test1(["title" => 3, "some" => "ahoj"]);
-echo (Test1::get_by_id(2)->title);
+$s = new Test1([]);
+$s = Test1::get_by_id(1);
+var_dump($s);
+$s->set_value("some", "fungue");
+$s->update();
+var_dump(Test1::get_by_id(1));
 
-// class ahoj{
-//     public $name;
-//     function __construct($name){
-//         $this->name = $name;
-
-//     }
-// }
-
-// $d = "ahoj";
-// $x = new $d("ahoj");
-// print_r($x);
+//print_r(Test1::all());

@@ -69,11 +69,11 @@ class Model(object):
 %s
     class %s extends Model{
 %s
-        public static function getAttributes(){
+        public static function get_attributes(){
             return %s;
         }
 
-        public function getConnection(){
+        public function get_connection(){
             return new mysqli(%s);
         }
 

@@ -1,13 +1,34 @@
 <?php
-require "abstract.php";
-use AB\BaseModel;
 
-abstract class Model extends BaseModel
+abstract class Model
 {
+    protected static $connection;
+    public static $dbName;
+    public $id;
+
+    abstract public static function get_attributes();
+    abstract public function get_connection();
+
+    public function __construct(array $attributes)
+    {
+        static::$connection = $this->get_connection();
+        foreach ($attributes as $key => $value) {
+            if (property_exists($this, $key)) {
+                if (array_key_exists($key, $this->get_attributes())) {
+                    $cls = $this->get_attributes()[$key];
+                    $this->$key = new $cls($value);
+                } else {
+                    $this->$key = $value;
+                }
+
+            }
+        }
+
+    }
 
     public function save()
     {
-        $return = "INSERT INTO " . $this->dbName() . " (";
+        $return = "INSERT INTO " . static::$dbName . " (";
         foreach ($this->get_fields() as $key => $value) {
             $return .= $key . ",";
         }
@@ -25,9 +46,16 @@ abstract class Model extends BaseModel
         }
         $return .= ")";
 
-        if ($this->connection->query($return) != true) {
-            echo $this->connection->error;
+        if (static::$connection->query($return) != true) {
+            echo static::$connection->error;
         }
+        $this->id = self::count_objects();
+    }
+
+    public function set_value(string $var_name, $value)
+    {
+        $cls = $this->get_attributes()[$var_name];
+        $this->$var_name = new $cls($value);
     }
 
     public function get_fields()
@@ -41,6 +69,28 @@ abstract class Model extends BaseModel
         return $fields;
 
     }
+
+    public function update()
+    {
+        if ($this->id == null) {
+            throw new Exception("The object wasnt saved yet.");
+        } else {
+            $return = "UPDATE " . static::$dbName . " SET ";
+            foreach ($this->get_fields() as $key => $value) {
+                $return .= $key . "=" . self::add_quotes($value->value) . ",";
+            }
+            if (substr($return, -1) == ",") {
+                $return = substr($return, 0, strlen($return) - 1);
+            }
+            $return .= " WHERE id=" . $this->id;
+        }
+        echo $return;
+        if (static::$connection->query($return) != true) {
+            echo static::$connection->error;
+        }
+    }
+
+    /* STATIC FUNCTIONS */
 
     public static function select_objects(array $condition)
     {
@@ -59,7 +109,7 @@ abstract class Model extends BaseModel
         if (self::evaluate_sql($sql) != null) {
             $return = [];
             foreach (self::evaluate_sql($sql)->fetch_all(MYSQLI_ASSOC) as $value) {
-                array_push($return, self::return_self($value, false));
+                array_push($return, self::return_self($value));
             }
             return $return;
         } else {
@@ -82,8 +132,7 @@ abstract class Model extends BaseModel
     public static function get_by_id($id)
     {
         $sql = "SELECT * FROM " . static::$dbName . " WHERE id=" . $id;
-        return self::return_self(self::evaluate_sql($sql)->fetch_object());
-
+        return self::return_self(self::evaluate_sql($sql)->fetch_assoc());
     }
 
     private static function add_quotes($attr)
@@ -96,21 +145,22 @@ abstract class Model extends BaseModel
 
     }
 
-    private static function return_self($obj, $is_object = true)
+    private static function return_self($parametrs)
     {
-        $parametrs = [];
         $cls = static::class;
-        if ($is_object) {
-            $f_object = new $cls([]);
-            foreach (get_object_vars($obj) as $key => $value) {
-                if (property_exists($f_object, $key)) {
-                    $parametrs[$key] = $value;
-                }
-            }
-        } else {
-            $parametrs = $obj;
+        /*if ($is_object) {
+        $f_object = new $cls([]);
+        foreach (get_object_vars($obj) as $key => $value) {
+        if (property_exists($f_object, $key)) {
+        $parametrs[$key] = $value;
         }
-        return new $cls($parametrs);
+        }
+        }*/
+        if ($parametrs != null) {
+            return new $cls($parametrs);
+        } else {
+            return $parametrs;
+        }
 
     }
 

@@ -1,30 +1,24 @@
 <?php
-// require_once "abstract.php";
-// use AB\BaseField;
 
-abstract class BaseField
+class Field
 {
     public $value;
-    abstract public static function create();
-    public function setValue($value)
+    protected $attribute = array();
+    protected $type;
+
+    public function __construct($value)
+    {
+        $this->set_value($value);
+    }
+
+    public function set_value($value)
     {
         $this->value = $value;
     }
-}
-
-class Field extends BaseField
-{
-    protected $attribute = array();
-    protected $type;
 
     public function __toString()
     {
         return $this->value;
-    }
-
-    public function __construct($value)
-    {
-        $this->setValue($value);
     }
 
     public function save($max_length = 255)
