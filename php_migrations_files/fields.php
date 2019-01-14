@@ -16,6 +16,11 @@ class Field
         $this->value = $value;
     }
 
+    public function get_value()
+    {
+        return $this->value;
+    }
+
     public function __toString()
     {
         return $this->value;
@@ -34,11 +39,6 @@ class Field
 
     }
 
-    public static function create()
-    {
-
-    }
-
 }
 
 class CharField extends Field
@@ -54,4 +54,28 @@ class IntField extends Field
 class StringField extends Field
 {
 
+}
+
+class ForeginKey extends Field
+{
+    public function __construct($value)
+    {
+        $cls = static::class;
+        $this->value = $cls::get($value);
+    }
+    public static function get($value)
+    {
+        $cls = $value[1];
+        if (gettype($value[0]) == "integer") {
+            return $cls::get_by_id($value[0]);
+        } else {
+            return $cls::get_by_id($value[0]->id);
+        }
+    }
+
+    public function get_value()
+    {
+        $this->value->update();
+        return $this->value->id;
+    }
 }

@@ -1,0 +1,69 @@
+{
+    "connection": {
+        "user": "root",
+        "password": "mysql",
+        "db_name": "php_migrations",
+        "host": "localhost"
+    },
+    "Test": {
+        "type": "model",
+        "d_name": "test4",
+        "properties": {
+            "title": {
+                "type": "int",
+                "max-length": "255"
+            },
+            "some": {
+                "type": "varchar",
+                "max-length": "255"
+            }
+        }
+    },
+
+    "Test1": {
+        "type": "model",
+        "properties": {
+            "title": {
+                "type": "int",
+                "max-length": "255"
+            },
+            "some": {
+                "type": "varchar",
+                "max-length": "255"
+            }
+        }
+    },
+
+    "engine":{
+        "type": "directory",
+        "models":{
+            "Test1": {
+                "type": "model",
+                "d_name": "test3",
+                "properties": {
+                    "title": {
+                        "type": "int",
+                        "max-length": "255"
+                    },
+                    "some": {
+                        "type": "varchar",
+                        "max-length": "255"
+                    }
+                }
+            },
+            "ahoj": {
+                "type": "model",
+                "properties": {
+                    "title": {
+                        "type": "int",
+                        "max-length": "255"
+                    },
+                    "some": {
+                        "type": "varchar",
+                        "max-length": "255"
+                    }
+                }
+            }
+        }
+    }
+}
