@@ -18,7 +18,7 @@ Then run migrate.py.
 Python 3+.
 Installed pymysql.
 
-# For ubuntu:
+#### For ubuntu:
 
 ```
 sudo apt-get install python3-pymysql
