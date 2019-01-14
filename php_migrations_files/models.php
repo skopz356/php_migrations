@@ -15,7 +15,12 @@ abstract class Model
         foreach ($attributes as $key => $value) {
             if (property_exists($this, $key)) {
                 if (array_key_exists($key, $this->get_attributes())) {
-                    $cls = $this->get_attributes()[$key];
+                    if (is_array($this->get_attributes()[$key])) {
+                        $cls = $this->get_attributes()[$key][0];
+                        $value = [(int) $value, static::$for_keys[$key]];
+                    } else {
+                        $cls = $this->get_attributes()[$key];
+                    }
                     $this->$key = new $cls($value);
                 } else {
                     $this->$key = $value;
@@ -38,7 +43,7 @@ abstract class Model
         $return .= ") VALUES (";
 
         foreach ($this->get_fields() as $key => $value) {
-            $return .= '"' . $value->value . '"' . ",";
+            $return .= '"' . $value->get_value() . '"' . ",";
         }
 
         if (substr($return, -1) == ",") {
@@ -84,7 +89,6 @@ abstract class Model
             }
             $return .= " WHERE id=" . $this->id;
         }
-        echo $return;
         if (static::$connection->query($return) != true) {
             echo static::$connection->error;
         }
@@ -148,14 +152,6 @@ abstract class Model
     private static function return_self($parametrs)
     {
         $cls = static::class;
-        /*if ($is_object) {
-        $f_object = new $cls([]);
-        foreach (get_object_vars($obj) as $key => $value) {
-        if (property_exists($f_object, $key)) {
-        $parametrs[$key] = $value;
-        }
-        }
-        }*/
         if ($parametrs != null) {
             return new $cls($parametrs);
         } else {
@@ -166,6 +162,7 @@ abstract class Model
 
     private function evaluate_sql($sql)
     {
+        self::set_connection();
         $result = static::$connection->query($sql);
         if (!$result) {
             return null;
@@ -173,6 +170,12 @@ abstract class Model
             return $result;
         }
 
+    }
+
+    public static function set_connection()
+    {
+        $cls = static::class;
+        $s = new $cls([]);
     }
 
 }
