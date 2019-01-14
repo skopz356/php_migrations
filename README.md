@@ -15,10 +15,14 @@ Then run migrate.py.
 
 ### Prerequisites
 
-It uses python to create the mysql tables so you need to have installed pymysql.
+Python 3+.
+Installed pymysql.
+
+# For ubuntu:
 
 ```
-Give examples
+sudo apt-get install python3-pymysql
+pip install pymysql
 ```
 
 
