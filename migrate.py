@@ -1,6 +1,6 @@
 #!/var/www/php_migrations/env/bin/python
 
-import json, os, pymysql, sys, re
+import json, os, pymysql, sys
 from text_unidecode import unidecode
 from shutil import rmtree
 import inspect, traceback
