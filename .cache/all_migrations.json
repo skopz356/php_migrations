@@ -1,0 +1,1 @@
+{"Test4": {"type": "model", "properties": {"title": {"type": "int", "max-length": "255"}, "some": {"type": "varchar", "max-length": "255"}}}}
